@@ -11,6 +11,7 @@ from itertools import (
 import operator
 import time
 
+# from matplotlib import pyplot as plt
 
 def operations(num):
     """ Orders math operations in all possible permutations and all possible
@@ -38,38 +39,59 @@ def num_perms(inputs):
     return list(permutations(inputs))
 
 
+# def create_graph(values):
+#     iteration_nums = [x for x, _ in values]
+#     permutation_vals = [y for _, y in values]
+
+#     plt.plot(iteration_nums, permutation_vals)
+#     plt.ylabel('Permutations')
+#     plt.xlabel('Iterations')
+
+#     plt.show()
+
+
 def generate_solutions(digits, target):
     string = ""
    
     def compute(digits, target, operations):
+        """ Recursively compute operations for each set of digits.
+        """
+        # Build the solution string on each pass of operations and digits
         nonlocal string
 
         head, *tail = digits
         if tail == [] or operations == []:
+            # Add tail to solution string before returning
             string += "{})".format(head)
             return head
         op = operations.pop()
 
+        # Build solution string preserving order of operations
         string += "{} ({}, ".format(op.__name__, head)
         try:
             return op(head, compute(tail, target, operations))
-        except ZeroDivisionError:
+        except (ZeroDivisionError, TypeError) as e:
             return
 
+    # Find all orders of all combinations of operations
     op_set = operations(len(digits) - 1)
+    # Find all orders of input digits
     combos = num_perms(digits)
-    answers = []
+    # List to collect valid answers
+    answers = set()
+
+    # Iterate over all operations and digit combos
     for ops in op_set:
         for combo in combos:
-            total  = compute(combo, 24, list(ops))
+            total = compute(combo, 24, list(ops))
             if total == target:
-                answers.append((total, string))
+                answers.add((total, string))
             string = ""
     return answers
 
 
 def format_results(results, inputs, perms, total):
-    """
+    """ Create human readable outputs for each input, target combination.
     """
     inputs = ', '.join(str(i) for i in inputs)
     
@@ -78,8 +100,8 @@ def format_results(results, inputs, perms, total):
             "The following combinations for the given inputs: {} ",
             "successfully totaled to '{}': ",
         ]).format(inputs, str(total)))
-        print ("\n".join(results))
-        print ("There were {} total solutions.".format(len(results)))
+        print("\n".join(map(str, results)))
+        print ("There was/were {} total solution(s).".format(len(results)))
 
     else:
         print ("".join([
@@ -87,19 +109,31 @@ def format_results(results, inputs, perms, total):
             "for inputs {}",
         ]).format(inputs, str(total)))
 
-    print("The program exexuted {} total permutations".format(len(perms)))
+    print("The program exexuted {} total numeric permutations".format(perms))
 
 
 def main():
+    graph_perms = []
+    times = []
     initial_input = (1, 3, 4, 6)
     initial_total = 24
     
-    # Perform calculation for inputs: 1, 3, 4, 6 and total: 24
-    results = generate_solutions(initial_input, initial_total)
+    # Set up counter to track iteration number and permutations for graphing
+    count = 1
+    initial_perm = len(num_perms(initial_input))
+    graph_perms.append((count, initial_perm))
 
-    print("solutions: {}".format(results))
+    # Perform calculation for inputs: 1, 3, 4, 6 and total: 24
+    start = time.time()
+    results = generate_solutions(initial_input, initial_total)
+    stop = time.time()
+
     # Format results for user readability
-    # format_results(results, initial_input, 10, initial_total)
+    format_results(
+        results, initial_input, initial_perm, initial_total)
+    duration = stop - start
+    times.append(duration)
+    print("This iteration took {} seconds".format(duration))
 
     while(True):
         cont = input("Would you like to continue testing values? (y/n) ")
@@ -130,11 +164,23 @@ def main():
         start = time.time()
         results = generate_solutions(numbers, total)
         stop = time.time()
-
-        print("This iteration took {} seconds".format(stop-start))
+                        
+        # Track iteration and permutations for graphing and times
+        count += 1
+        perms = len(num_perms(numbers))
+        duration = stop - start
+        times.append(duration)
+        graph_perms.append((count, perms))
+        
+        print("This iteration took {} seconds".format(duration))
+        
         # Format results for user readability
-        # format_results(results, numbers, 10, total)
+        format_results(results, numbers, perms, total)
 
+    avg_time = sum(times) / float(len(times))
+    print("The average time per iteration was: {} seconds".format(avg_time))
+
+    # create_graph(graph_perms)
 
 
 main()
