@@ -11,7 +11,9 @@ from itertools import (
 import operator
 import time
 
-# from matplotlib import pyplot as plt
+import matplotlib
+matplotlib.use('Agg')
+from matplotlib import pyplot as plt
 
 def operations(num):
     """ Orders math operations in all possible permutations and all possible
@@ -39,15 +41,15 @@ def num_perms(inputs):
     return list(permutations(inputs))
 
 
-# def create_graph(values):
-#     iteration_nums = [x for x, _ in values]
-#     permutation_vals = [y for _, y in values]
+def create_graph(values):
+    iteration_nums = [x for x, _ in values]
+    permutation_vals = [y for _, y in values]
 
-#     plt.plot(iteration_nums, permutation_vals)
-#     plt.ylabel('Permutations')
-#     plt.xlabel('Iterations')
+    plt.plot(iteration_nums, permutation_vals)
+    plt.ylabel('Permutations')
+    plt.xlabel('Iterations')
 
-#     plt.show()
+    plt.savefig('graph.png')
 
 
 def generate_solutions(digits, target):
@@ -180,7 +182,7 @@ def main():
     avg_time = sum(times) / float(len(times))
     print("The average time per iteration was: {} seconds".format(avg_time))
 
-    # create_graph(graph_perms)
+    create_graph(graph_perms)
 
 
 main()
