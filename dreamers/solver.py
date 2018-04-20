@@ -45,9 +45,9 @@ def create_graph(values):
     iteration_nums = [x for x, _ in values]
     permutation_vals = [y for _, y in values]
 
-    plt.plot(iteration_nums, permutation_vals)
+    plt.plot(iteration_nums, permutation_vals ,'-bo')
     plt.ylabel('Permutations')
-    plt.xlabel('Iterations')
+    plt.xlabel('Iteration Number')
 
     plt.savefig('graph.png')
 
@@ -89,7 +89,7 @@ def generate_solutions(digits, target):
             if total == target:
                 answers.add((total, string))
             string = ""
-    return answers
+    return answers, len(op_set), len(combos)
 
 
 def format_results(results, inputs, perms, total):
@@ -122,17 +122,17 @@ def main():
     
     # Set up counter to track iteration number and permutations for graphing
     count = 1
-    initial_perm = len(num_perms(initial_input))
-    graph_perms.append((count, initial_perm))
 
     # Perform calculation for inputs: 1, 3, 4, 6 and total: 24
     start = time.time()
-    results = generate_solutions(initial_input, initial_total)
+    results, perms, ops = generate_solutions(initial_input, initial_total)
     stop = time.time()
+    total_perms = perms * ops
+    graph_perms.append((count, total_perms))
 
     # Format results for user readability
     format_results(
-        results, initial_input, initial_perm, initial_total)
+        results, initial_input, total_perms, initial_total)
     duration = stop - start
     times.append(duration)
     print("This iteration took {} seconds".format(duration))
@@ -164,25 +164,30 @@ def main():
         
         # Perform calculation for specified user inputs and total
         start = time.time()
-        results = generate_solutions(numbers, total)
+        results, perms, ops = generate_solutions(numbers, total)
         stop = time.time()
                         
         # Track iteration and permutations for graphing and times
         count += 1
-        perms = len(num_perms(numbers))
         duration = stop - start
         times.append(duration)
-        graph_perms.append((count, perms))
+
+        total_perms = perms * ops
+        graph_perms.append((count, total_perms))
         
         print("This iteration took {} seconds".format(duration))
         
         # Format results for user readability
-        format_results(results, numbers, perms, total)
+        format_results(results, numbers,total_perms, total)
 
     avg_time = sum(times) / float(len(times))
     print("The average time per iteration was: {} seconds".format(avg_time))
 
     create_graph(graph_perms)
+    print(
+        "The Permutation Graph is located in the 'graph.png' file in this",
+        "directory.",
+    )
 
 
 main()
